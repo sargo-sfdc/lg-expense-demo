@@ -10,6 +10,30 @@ Do you want to deploy a set of changes, or create a self-contained application? 
 
 The `sfdx-project.json` file contains useful configuration information for your project. See [Salesforce DX Project Configuration](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm) in the _Salesforce DX Developer Guide_ for details about this file.
 
+## Connecting to a different Salesforce org
+
+To use a different org for deploy, retrieve, and other CLI commands:
+
+1. **Log in to the new org** (use an alias you’ll remember):
+   ```bash
+   sf org login web --alias MyNewOrg
+   ```
+   For a **sandbox**:
+   ```bash
+   sf org login web --alias MyNewOrg --instance-url https://test.salesforce.com
+   ```
+
+2. **Set it as the default for this project** (from the project root):
+   ```bash
+   sf config set target-org MyNewOrg
+   ```
+   Use `--global` only if you want this org as the default for all projects on your machine.
+
+3. **Optional – default to sandbox login URL**  
+   If this project always uses a sandbox, edit `sfdx-project.json` and set:
+   - `"sfdcLoginUrl": "https://test.salesforce.com"`
+   That only affects where the browser opens for login; the connected org is still chosen via the steps above.
+
 ## Read All About It
 
 - [Salesforce Extensions Documentation](https://developer.salesforce.com/tools/vscode/)

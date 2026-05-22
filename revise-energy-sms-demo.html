@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Revise Energy Demo</title>
+<style>
+  :root {
+    --ios-bg: #000000;
+    --bubble-green: #34C759;
+    --bubble-gray: #3A3A3C;
+    --text-primary: #FFFFFF;
+    --text-secondary: rgba(255,255,255,0.6);
+    --separator: rgba(255,255,255,0.08);
+    --blur-bg: rgba(30,30,30,0.72);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+    background: var(--ios-bg);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100dvh;
+    width: 100vw;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ==================== LOCK SCREEN ==================== */
+  #lockScreen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(165deg, #1a1a2e 0%, #0a0a14 40%, #0d1117 100%);
+    z-index: 10;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  #lockScreen.hidden {
+    opacity: 0;
+    transform: scale(1.02);
+    pointer-events: none;
+  }
+
+  .lock-time {
+    margin-top: max(env(safe-area-inset-top, 50px), 50px);
+    font-size: 76px;
+    font-weight: 700;
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+  .lock-date {
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    letter-spacing: 0.2px;
+  }
+
+  .notification-stack {
+    width: calc(100% - 32px);
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .notification-card {
+    background: var(--blur-bg);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border-radius: 20px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border: 1px solid rgba(255,255,255,0.06);
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+  }
+  .notification-card:active {
+    transform: scale(0.97);
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .notif-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .notif-app-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    background: #34C759;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .notif-app-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    flex: 1;
+  }
+  .notif-time {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .notif-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .notif-body {
+    font-size: 15px;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .lock-hint {
+    position: absolute;
+    bottom: max(env(safe-area-inset-bottom, 30px), 30px);
+    font-size: 13px;
+    color: var(--text-secondary);
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+  }
+
+  /* ==================== MESSAGE VIEW ==================== */
+  #messageView {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+    z-index: 5;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  #messageView.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .msg-nav {
+    padding: max(env(safe-area-inset-top, 48px), 48px) 16px 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--separator);
+    position: relative;
+    z-index: 2;
+  }
+  .msg-back {
+    font-size: 17px;
+    color: #007AFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 400;
+  }
+  .msg-back svg { width: 20px; height: 20px; }
+  .msg-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #2C2C2E;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .msg-avatar-placeholder {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+  }
+  .msg-contact-info { flex: 1; text-align: center; }
+  .msg-contact-name { font-size: 17px; font-weight: 600; }
+  .msg-contact-label { font-size: 12px; color: var(--text-secondary); }
+  .msg-nav-actions { width: 34px; display: flex; justify-content: flex-end; }
+  .msg-nav-actions svg { width: 22px; height: 22px; color: #007AFF; }
+
+  .msg-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .msg-date-label {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 8px 0 4px;
+  }
+
+  .msg-bubble-row {
+    display: flex;
+    animation: bubbleFade 0.35s ease forwards;
+    opacity: 0;
+  }
+  @keyframes bubbleFade {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .msg-bubble-row.incoming { justify-content: flex-start; }
+  .msg-bubble-row.outgoing { justify-content: flex-end; }
+
+  .msg-bubble {
+    max-width: 78%;
+    padding: 9px 14px;
+    border-radius: 18px;
+    font-size: 16px;
+    line-height: 1.4;
+    word-wrap: break-word;
+  }
+  .msg-bubble-row.incoming .msg-bubble {
+    background: var(--bubble-gray);
+    border-bottom-left-radius: 6px;
+    color: var(--text-primary);
+  }
+  .msg-bubble-row.outgoing .msg-bubble {
+    background: var(--bubble-green);
+    border-bottom-right-radius: 6px;
+    color: #fff;
+  }
+
+  .msg-bubble .crew-card {
+    background: rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 10px;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .crew-card .crew-photo {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: #1C1C1E;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .crew-photo svg { width: 28px; height: 28px; color: rgba(255,255,255,0.3); }
+  .crew-card .crew-details { font-size: 14px; line-height: 1.5; }
+  .crew-details strong { font-weight: 600; }
+
+  .msg-bubble .balance-box {
+    margin-top: 10px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .balance-box .balance-label { font-size: 12px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.5px; }
+  .balance-box .balance-amount { font-size: 26px; font-weight: 700; margin-top: 2px; }
+
+  .msg-time-stamp {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    padding: 0 4px;
+  }
+  .msg-bubble-row.incoming .msg-time-stamp { text-align: left; }
+  .msg-bubble-row.outgoing .msg-time-stamp { text-align: right; }
+
+  .msg-input-bar {
+    padding: 8px 12px max(env(safe-area-inset-bottom, 20px), 20px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,0,0,0.9);
+    border-top: 1px solid var(--separator);
+  }
+  .msg-input-field {
+    flex: 1;
+    background: var(--bubble-gray);
+    border: none;
+    border-radius: 20px;
+    padding: 10px 16px;
+    font-size: 16px;
+    color: var(--text-primary);
+    outline: none;
+    font-family: inherit;
+  }
+  .msg-input-field::placeholder { color: rgba(255,255,255,0.35); }
+  .msg-send-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #007AFF;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.1s ease;
+  }
+  .msg-send-btn:active { transform: scale(0.9); }
+  .msg-send-btn svg { width: 18px; height: 18px; color: #fff; }
+
+  .typing-indicator {
+    display: none;
+    justify-content: flex-start;
+    padding: 0 16px;
+  }
+  .typing-indicator.visible { display: flex; }
+  .typing-dots {
+    background: var(--bubble-gray);
+    border-radius: 18px;
+    border-bottom-left-radius: 6px;
+    padding: 12px 16px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .typing-dots span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    animation: typingBounce 1.2s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  /* ==================== EDIT MODAL ==================== */
+  #editOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  #editOverlay.visible { display: flex; }
+  .edit-sheet {
+    background: #1C1C1E;
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 500px;
+    padding: 20px 20px max(env(safe-area-inset-bottom, 30px), 30px);
+    animation: sheetUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes sheetUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .edit-sheet h3 {
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .edit-sheet label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    margin-top: 14px;
+  }
+  .edit-sheet label:first-of-type { margin-top: 0; }
+  .edit-sheet input, .edit-sheet textarea {
+    width: 100%;
+    background: #2C2C2E;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 16px;
+    color: var(--text-primary);
+    font-family: inherit;
+    outline: none;
+  }
+  .edit-sheet input:focus, .edit-sheet textarea:focus { border-color: #007AFF; }
+  .edit-sheet textarea { resize: none; height: 60px; }
+  .edit-btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .edit-btn-row button {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-cancel { background: #2C2C2E; color: var(--text-primary); }
+  .btn-save { background: #007AFF; color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- ==================== LOCK SCREEN ==================== -->
+<div id="lockScreen">
+  <div class="lock-time" id="lockTime">7:00</div>
+  <div class="lock-date" id="lockDate">Tuesday, July 15</div>
+
+  <div class="notification-stack">
+    <div class="notification-card" id="mainNotification" onclick="openMessages()">
+      <div class="notif-header">
+        <div class="notif-app-icon">💬</div>
+        <span class="notif-app-name">Messages</span>
+        <span class="notif-time">now</span>
+      </div>
+      <div class="notif-title" id="notifTitle">Revise Energy</div>
+      <div class="notif-body" id="notifBody">Good morning! 🏠 Your HVAC installation crew is on the way. Mike D. and team will arrive between 8:30–9:00 AM. Your remaining balance is $2,475.00. Reply to this message anytime!</div>
+    </div>
+  </div>
+
+  <div class="lock-hint">tap notification to open</div>
+</div>
+
+<!-- ==================== MESSAGE VIEW ==================== -->
+<div id="messageView">
+  <div class="msg-nav">
+    <div class="msg-back" onclick="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="msg-avatar">
+      <span class="msg-avatar-placeholder">RE</span>
+    </div>
+    <div class="msg-contact-info">
+      <div class="msg-contact-name" id="contactName">Revise Energy</div>
+      <div class="msg-contact-label">Automated Notification</div>
+    </div>
+    <div class="msg-nav-actions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    </div>
+  </div>
+
+  <div class="msg-body" id="msgBody">
+    <!-- Messages injected by JS -->
+  </div>
+
+  <div class="typing-indicator" id="typingIndicator">
+    <div class="typing-dots"><span></span><span></span><span></span></div>
+  </div>
+
+  <div class="msg-input-bar">
+    <input type="text" class="msg-input-field" id="replyInput" placeholder="Text Message" />
+    <button class="msg-send-btn" onclick="sendReply()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ==================== EDIT OVERLAY ==================== -->
+<div id="editOverlay">
+  <div class="edit-sheet">
+    <h3>Customize Demo</h3>
+    <label>Crew Lead Name</label>
+    <input type="text" id="editCrewName" value="Mike D." />
+    <label>Crew Size</label>
+    <input type="text" id="editCrewSize" value="3-person crew" />
+    <label>ETA Window</label>
+    <input type="text" id="editETA" value="8:30–9:00 AM" />
+    <label>Balance Owed</label>
+    <input type="text" id="editBalance" value="$2,475.00" />
+    <label>Service Type</label>
+    <input type="text" id="editService" value="HVAC Installation" />
+    <label>Customer Name (for reply)</label>
+    <input type="text" id="editCustomer" value="Sarah" />
+    <div class="edit-btn-row">
+      <button class="btn-cancel" onclick="closeEdit()">Cancel</button>
+      <button class="btn-save" onclick="saveEdit()">Save & Reset</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ==================== CONFIG ====================
+  let config = {
+    crewName: 'Mike D.',
+    crewSize: '3-person crew',
+    eta: '8:30–9:00 AM',
+    balance: '$2,475.00',
+    service: 'HVAC Installation',
+    customer: 'Sarah'
+  };
+
+  // ==================== LOCK SCREEN ====================
+  function openMessages() {
+    document.getElementById('lockScreen').classList.add('hidden');
+    document.getElementById('messageView').classList.add('visible');
+    renderMessages();
+  }
+
+  function goBack() {
+    document.getElementById('messageView').classList.remove('visible');
+    setTimeout(() => {
+      document.getElementById('lockScreen').classList.remove('hidden');
+    }, 100);
+  }
+
+  // ==================== MESSAGES ====================
+  let messages = [];
+  let replyPhase = 0;
+
+  function buildInitialMessages() {
+    return [
+      {
+        type: 'incoming',
+        html: `Good morning! 🏠 Your <strong>${config.service}</strong> crew is on the way.
+          <div class="crew-card">
+            <div class="crew-photo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="crew-details">
+              <strong>${config.crewName}</strong><br/>
+              ${config.crewSize} · Lead Installer<br/>
+              ⭐ 4.9 rating
+            </div>
+          </div>`,
+        time: '7:00 AM'
+      },
+      {
+        type: 'incoming',
+        html: `📍 Estimated arrival: <strong>${config.eta}</strong>
+          <div class="balance-box">
+            <div class="balance-label">Remaining Balance</div>
+            <div class="balance-amount">${config.balance}</div>
+          </div>
+          <div style="margin-top:8px; font-size:14px; color:rgba(255,255,255,0.7);">Payment accepted on-site: card, check, or financing. Reply with any questions!</div>`,
+        time: '7:00 AM'
+      }
+    ];
+  }
+
+  function renderMessages() {
+    const body = document.getElementById('msgBody');
+    if (messages.length === 0) {
+      messages = buildInitialMessages();
+    }
+    body.innerHTML = '<div class="msg-date-label">Today 7:00 AM</div>';
+    messages.forEach((m, i) => {
+      const row = document.createElement('div');
+      row.className = `msg-bubble-row ${m.type}`;
+      row.style.animationDelay = `${i * 0.08}s`;
+      row.innerHTML = `
+        <div>
+          <div class="msg-bubble">${m.html}</div>
+          <div class="msg-time-stamp">${m.time}</div>
+        </div>`;
+      body.appendChild(row);
+    });
+    setTimeout(() => { body.scrollTop = body.scrollHeight; }, 100);
+  }
+
+  // ==================== REPLY LOGIC ====================
+  const autoReplies = [
+    () => `Hi ${config.customer}! Great question — ${config.crewName} and the team will have ID badges and a Revise Energy–branded vehicle. You'll also get a notification when they're 5 minutes out. 👍`,
+    () => `Absolutely! We accept Visa, Mastercard, and checks on-site. You can also set up financing through our portal. I'll send the link now.`,
+    () => `You're all set, ${config.customer}! If anything else comes up, our logistics team is here until 6 PM. Have a great day! 😊`
+  ];
+
+  function sendReply() {
+    const input = document.getElementById('replyInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    messages.push({ type: 'outgoing', html: text, time: getCurrentTime() });
+    input.value = '';
+    renderMessages();
+
+    if (replyPhase < autoReplies.length) {
+      const indicator = document.getElementById('typingIndicator');
+      indicator.classList.add('visible');
+      setTimeout(() => {
+        indicator.classList.remove('visible');
+        messages.push({ type: 'incoming', html: autoReplies[replyPhase](), time: getCurrentTime() });
+        replyPhase++;
+        renderMessages();
+      }, 1800);
+    }
+  }
+
+  document.getElementById('replyInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); sendReply(); }
+  });
+
+  function getCurrentTime() {
+    const now = new Date();
+    let h = now.getHours(), m = now.getMinutes();
+    const ap = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return `${h}:${m.toString().padStart(2,'0')} ${ap}`;
+  }
+
+  // ==================== EDIT (triple-tap top-left) ====================
+  let tapCount = 0, tapTimer = null;
+  document.addEventListener('click', (e) => {
+    if (e.clientX < 60 && e.clientY < 80) {
+      tapCount++;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => { tapCount = 0; }, 600);
+      if (tapCount >= 3) {
+        tapCount = 0;
+        openEdit();
+      }
+    }
+  });
+
+  function openEdit() {
+    document.getElementById('editCrewName').value = config.crewName;
+    document.getElementById('editCrewSize').value = config.crewSize;
+    document.getElementById('editETA').value = config.eta;
+    document.getElementById('editBalance').value = config.balance;
+    document.getElementById('editService').value = config.service;
+    document.getElementById('editCustomer').value = config.customer;
+    document.getElementById('editOverlay').classList.add('visible');
+  }
+  function closeEdit() {
+    document.getElementById('editOverlay').classList.remove('visible');
+  }
+  function saveEdit() {
+    config.crewName = document.getElementById('editCrewName').value;
+    config.crewSize = document.getElementById('editCrewSize').value;
+    config.eta = document.getElementById('editETA').value;
+    config.balance = document.getElementById('editBalance').value;
+    config.service = document.getElementById('editService').value;
+    config.customer = document.getElementById('editCustomer').value;
+
+    // Update lock screen notification
+    document.getElementById('notifBody').textContent =
+      `Good morning! 🏠 Your ${config.service} crew is on the way. ${config.crewName} and team will arrive ${config.eta}. Your remaining balance is ${config.balance}. Reply to this message anytime!`;
+
+    // Reset conversation
+    messages = [];
+    replyPhase = 0;
+    closeEdit();
+
+    // Go back to lock screen
+    document.getElementById('messageView').classList.remove('visible');
+    setTimeout(() => {
+      document.getElementById('lockScreen').classList.remove('hidden');
+    }, 100);
+  }
+</script>
+</body>
+</html>

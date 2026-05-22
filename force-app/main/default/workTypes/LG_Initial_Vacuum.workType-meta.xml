@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <autoCreateServiceAppointment>true</autoCreateServiceAppointment>
+    <description>Season-opening initial vacuum and cleanup. Lands on customer Swim Date.</description>
+    <durationType>Hours</durationType>
+    <estimatedDuration>4</estimatedDuration>
+    <label>Initial Vacuum</label>
+    <skillRequirements>
+        <skill>LG_Initial_Vac_Specialist</skill>
+        <skillLevel>1</skillLevel>
+    </skillRequirements>
+</WorkType>

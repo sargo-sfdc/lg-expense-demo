@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <autoCreateServiceAppointment>true</autoCreateServiceAppointment>
+    <description>In-season weekly pool maintenance. Recurring via Maintenance Plan.</description>
+    <durationType>Hours</durationType>
+    <estimatedDuration>1</estimatedDuration>
+    <label>Weekly Maintenance</label>
+    <skillRequirements>
+        <skill>LG_Pool_Tech</skill>
+        <skillLevel>1</skillLevel>
+    </skillRequirements>
+</WorkType>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>LG_Demo_Gantt_Active_Only</fullName>
+    <columns>Name</columns>
+    <columns>Status</columns>
+    <columns>EarliestStartTime</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>LG_Active__c</field>
+        <operation>equals</operation>
+        <value>1</value>
+    </filters>
+    <label>LG Demo Gantt (Active Only)</label>
+</ListView>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <autoCreateServiceAppointment>true</autoCreateServiceAppointment>
+    <description>Off-season twice-monthly maintenance check.</description>
+    <durationType>Minutes</durationType>
+    <estimatedDuration>30</estimatedDuration>
+    <label>Winter Maintenance</label>
+    <skillRequirements>
+        <skill>LG_Pool_Tech</skill>
+        <skillLevel>1</skillLevel>
+    </skillRequirements>
+</WorkType>

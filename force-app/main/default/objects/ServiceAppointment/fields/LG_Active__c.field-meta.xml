@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>LG_Active__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Demo visibility flag for cascade-controlled Service Appointments. False = hidden from Gantt; True = visible. Flipped by LG_Pool_Open_Cascade and related Flows.</description>
+    <label>Active</label>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,0 +1,170 @@
+<template>
+    <lightning-card title="Log Expense" icon-name="standard:expense">
+        <div class="slds-p-around_medium">
+            <template lwc:if={showSpinner}>
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </template>
+
+            <template lwc:if={showError}>
+                <div class="slds-m-bottom_medium" role="alert">
+                    <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+                        <span class="slds-assistive-text">error</span>
+                        <h2>{loadError}</h2>
+                    </div>
+                </div>
+                <lightning-button
+                    label="Close"
+                    onclick={handleCancel}
+                    class="slds-m-top_small"
+                ></lightning-button>
+            </template>
+
+            <template lwc:if={showSuccessPanel}>
+                <div class="slds-m-bottom_medium">
+                    <div class="slds-notify slds-notify_alert slds-alert_success" role="status">
+                        <span class="slds-assistive-text">success</span>
+                        <h2>Expense logged</h2>
+                        <p class="slds-m-top_x-small slds-text-body_small">
+                            Reference: <span class="ce-mono">{savedRecordId}</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="slds-m-top_medium">
+                    <lightning-button
+                        label="Open expense"
+                        variant="brand"
+                        onclick={handleViewRecord}
+                        class="slds-m-right_x-small"
+                    ></lightning-button>
+                    <lightning-button label="Close" onclick={handleCloseResult}></lightning-button>
+                </div>
+            </template>
+
+            <template lwc:if={showSuccessNoIdPanel}>
+                <div class="slds-m-bottom_medium">
+                    <div class="slds-notify slds-notify_alert slds-alert_warning" role="status">
+                        <span class="slds-assistive-text">warning</span>
+                        <h2>Expense may have been saved.</h2>
+                        <p class="slds-m-top_x-small">The new record could not be loaded. Check your Expenses list or run a report. If the object or field names in Setup don't match ExpenseController, update the Apex constants and redeploy.</p>
+                    </div>
+                </div>
+                <div class="slds-m-top_medium">
+                    <lightning-button label="Close" onclick={handleCloseResult}></lightning-button>
+                </div>
+            </template>
+
+            <template lwc:if={showSubmitErrorPanel}>
+                <div class="slds-m-bottom_medium" role="alert">
+                    <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+                        <span class="slds-assistive-text">error</span>
+                        <h2>{submitResult.errorMessage}</h2>
+                    </div>
+                </div>
+                <div class="slds-m-top_medium">
+                    <lightning-button label="Close" onclick={handleCloseResult}></lightning-button>
+                </div>
+            </template>
+
+            <template lwc:if={showForm}>
+                <div class="ce-form-shell slds-is-relative">
+                    <template lwc:if={isSubmitting}>
+                        <div class="ce-overlay" role="status" aria-live="polite" aria-busy="true">
+                            <lightning-spinner alternative-text="Saving expense" size="small"></lightning-spinner>
+                            <span class="slds-assistive-text">Saving expense</span>
+                        </div>
+                    </template>
+
+                    <div class="slds-form slds-form_stacked createExpense-form">
+                        <lightning-layout multiple-rows pull-to-boundary="small">
+                            <lightning-layout-item size="12" small-device-size="6" padding="horizontal-small">
+                                <lightning-input
+                                    label="Amount"
+                                    name="amount"
+                                    type="number"
+                                    formatter="currency"
+                                    currency-code="USD"
+                                    step="0.01"
+                                    min="0.01"
+                                    value={amount}
+                                    onchange={handleAmountChange}
+                                    required
+                                    field-level-help="Total receipt amount in USD."
+                                    disabled={isSubmitting}
+                                    variant="standard"
+                                ></lightning-input>
+                            </lightning-layout-item>
+                            <lightning-layout-item size="12" small-device-size="6" padding="horizontal-small">
+                                <lightning-input
+                                    label="Date"
+                                    name="expenseDate"
+                                    type="date"
+                                    value={expenseDate}
+                                    onchange={handleDateChange}
+                                    required
+                                    field-level-help="When the purchase happened."
+                                    disabled={isSubmitting}
+                                    variant="standard"
+                                ></lightning-input>
+                            </lightning-layout-item>
+                        </lightning-layout>
+
+                        <div class="slds-form-element slds-m-top_small">
+                            <lightning-combobox
+                                name="expenseType"
+                                label="Category"
+                                value={expenseType}
+                                options={expenseTypeOptions}
+                                onchange={handleTypeChange}
+                                placeholder="Select a category"
+                                required
+                                field-level-help="What kind of expense this is."
+                                disabled={isSubmitting}
+                            ></lightning-combobox>
+                        </div>
+
+                        <div class="slds-form-element slds-m-top_small">
+                            <lightning-textarea
+                                name="description"
+                                label="Description"
+                                value={description}
+                                onchange={handleDescriptionChange}
+                                maxlength="255"
+                                field-level-help="Optional notes for approvers."
+                                disabled={isSubmitting}
+                            ></lightning-textarea>
+                        </div>
+
+                        <div class="slds-form-element slds-m-top_small">
+                            <lightning-input
+                                type="file"
+                                name="fileUpload"
+                                label="Attachments"
+                                multiple
+                                accept="image/*,.pdf,application/pdf"
+                                onchange={handleFileChange}
+                                field-level-help="Receipts or PDFs (up to 5 files)."
+                                disabled={isSubmitting}
+                                variant="label-stacked"
+                            ></lightning-input>
+                            <template lwc:if={selectedFileCount}>
+                                <p class="slds-m-top_xx-small slds-text-color_weak">
+                                    {selectedFileCount} file(s) selected (max 5 uploaded)
+                                </p>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-m-top_medium">
+                    <lightning-button
+                        label="Save"
+                        variant="brand"
+                        onclick={handleSubmit}
+                        disabled={isSaveDisabled}
+                        class="slds-m-right_x-small"
+                    ></lightning-button>
+                    <lightning-button label="Cancel" onclick={handleCancel} disabled={isSubmitting}></lightning-button>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

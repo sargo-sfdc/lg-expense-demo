@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>LG_Default_Service_Territory__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Default Service Territory for the Account. Auto-populates ServiceAppointment.ServiceTerritoryId via Flow.</description>
+    <label>Default Service Territory</label>
+    <referenceTo>ServiceTerritory</referenceTo>
+    <relationshipName>Default_Service_Territory_Accounts</relationshipName>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <type>Lookup</type>
+</CustomField>

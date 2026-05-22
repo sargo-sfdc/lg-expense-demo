@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "description": "Salesforce App",
   "scripts": {
+    "seed:expenses": "sf apex run --file scripts/apex/run-expense-demo-data.apex",
+    "seed:expenses:max": "sf apex run --file scripts/apex/run-expense-demo-data-max.apex",
+    "migrate:expense-category": "sf apex run --file scripts/apex/run-expense-category-migration.apex",
     "lint": "eslint **/{aura,lwc}/**/*.js",
     "test": "npm run test:unit",
     "test:unit": "sfdx-lwc-jest",

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <name>Execute_Date_Change_Cascade</name>
+        <label>Execute Date Change Cascade</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <actionName>LG_DateChangeCascadeInvocable</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>serviceContractId</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>oldSwimDate</name>
+            <value>
+                <elementReference>$Record__Prior.LG_Requested_Swim_Date__c</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>newSwimDate</name>
+            <value>
+                <elementReference>$Record.LG_Requested_Swim_Date__c</elementReference>
+            </value>
+        </inputParameters>
+        <nameSegment>LG_DateChangeCascadeInvocable</nameSegment>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </actionCalls>
+    <apiVersion>65.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <description>When Mecox Estate FY26 Annual requested swim date changes, runs Apex cascade: Assets, contract line quantities, stale WOs, plan dates, regeneration.</description>
+    <environments>Default</environments>
+    <interviewLabel>LG Service Contract Date Change {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Service Contract Date Change Cascade</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Execute_Date_Change_Cascade</targetReference>
+        </connector>
+        <filterFormula>AND(
+  ISCHANGED({!$Record.LG_Requested_Swim_Date__c}),
+  {!$Record.Id} = &quot;810fj0000BLDMnNAQX&quot;
+)</filterFormula>
+        <object>ServiceContract</object>
+        <recordTriggerType>Update</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <autoCreateServiceAppointment>true</autoCreateServiceAppointment>
+    <description>In-season chemical testing and balancing. Paired with Weekly Maintenance.</description>
+    <durationType>Minutes</durationType>
+    <estimatedDuration>30</estimatedDuration>
+    <label>Chem Check</label>
+    <skillRequirements>
+        <skill>LG_Chem_Specialist</skill>
+        <skillLevel>1</skillLevel>
+    </skillRequirements>
+</WorkType>

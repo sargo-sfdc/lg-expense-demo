@@ -1,0 +1,29 @@
+/* Tight field spacing; overlay for save-in-progress */
+.createExpense-form .slds-form-element {
+    margin-bottom: var(--slds-spacing-medium, 1rem);
+}
+
+.createExpense-form .slds-form-element:last-of-type {
+    margin-bottom: 0;
+}
+
+.ce-form-shell {
+    min-height: 4rem;
+}
+
+.ce-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.82);
+    border-radius: var(--slds-border-radius-medium, 0.25rem);
+}
+
+.ce-mono {
+    font-family: var(--slds-font-family-mono, Consolas, monospace);
+    font-size: var(--slds-font-size-2, 0.75rem);
+    word-break: break-all;
+}

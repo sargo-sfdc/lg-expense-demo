@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <autoCreateServiceAppointment>true</autoCreateServiceAppointment>
+    <description>Season-closing pool winterization.</description>
+    <durationType>Hours</durationType>
+    <estimatedDuration>3</estimatedDuration>
+    <label>Winter Service</label>
+    <skillRequirements>
+        <skill>LG_Winterize_Certified</skill>
+        <skillLevel>1</skillLevel>
+    </skillRequirements>
+</WorkType>

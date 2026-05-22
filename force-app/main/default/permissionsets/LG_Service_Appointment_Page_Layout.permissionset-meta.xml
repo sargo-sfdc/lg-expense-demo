@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Assigns the unmanaged Service Appointment layout (includes Follow-Up Required for mobile).</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>LG Service Appointment Page Layout</label>
+    <layoutAssignments>
+        <layout>ServiceAppointment-Service Appointment Layout</layout>
+    </layoutAssignments>
+</PermissionSet>

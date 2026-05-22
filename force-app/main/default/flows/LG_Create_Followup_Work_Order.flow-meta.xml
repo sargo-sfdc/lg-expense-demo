@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <name>Create_Follow_Up_Work_Order</name>
+        <label>Create Follow-Up Work Order</label>
+        <locationX>176</locationX>
+        <locationY>134</locationY>
+        <actionName>LG_CreateFollowupWorkOrderInvocable</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>recordId</name>
+            <value>
+                <elementReference>formCallingRecordId</elementReference>
+            </value>
+        </inputParameters>
+        <nameSegment>LG_CreateFollowupWorkOrderInvocable</nameSegment>
+    </actionCalls>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <description>Field Service Mobile Quick Action: creates a next-day Repair/Follow-Up Work Order from a Service Appointment, assigns Brian, sets LG_Active__c on the new SA.</description>
+    <environments>Default</environments>
+    <formulas>
+        <name>formCallingRecordId</name>
+        <dataType>String</dataType>
+        <expression>IF(LEN({!Id}) &gt; 0, {!Id}, {!recordId})</expression>
+    </formulas>
+    <interviewLabel>LG Create Followup Work Order {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>LG Create Followup Work Order</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>FieldServiceMobile</processType>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Create_Follow_Up_Work_Order</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+    <variables>
+        <name>Id</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>recordId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+</Flow>

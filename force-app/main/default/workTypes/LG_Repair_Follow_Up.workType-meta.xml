@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <autoCreateServiceAppointment>true</autoCreateServiceAppointment>
+    <description>One-off issue resolution. Created via field-tech Follow-Up flow.</description>
+    <durationType>Hours</durationType>
+    <estimatedDuration>1</estimatedDuration>
+    <label>Repair / Follow-Up</label>
+    <skillRequirements>
+        <skill>LG_Pool_Tech</skill>
+        <skillLevel>1</skillLevel>
+    </skillRequirements>
+</WorkType>
